@@ -17,7 +17,7 @@ def user_terms_updated(sender, **kwargs):
     LOGGER.debug("User T&C Updated Signal Handler")
     if kwargs.get("instance").user:
         cache.delete(
-            "tandc.not_agreed_terms_" + kwargs.get("instance").user.get_username()
+            "tandc.not_agreed_terms_" + str(kwargs.get('instance').user.pk)
         )
 
 
@@ -30,4 +30,4 @@ def terms_updated(sender, **kwargs):
     if kwargs.get("instance").slug:
         cache.delete("tandc.active_terms_" + kwargs.get("instance").slug)
     for utandc in UserTermsAndConditions.objects.all():
-        cache.delete("tandc.not_agreed_terms_" + utandc.user.get_username())
+        cache.delete("tandc.not_agreed_terms_" + str(utandc.user.pk))

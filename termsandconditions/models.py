@@ -162,7 +162,7 @@ class TermsAndConditions(models.Model):
                 # Django's has_perm() returns True if is_superuser, we don't want that
                 return []
 
-        not_agreed_terms = cache.get("tandc.not_agreed_terms_" + user.get_username())
+        not_agreed_terms = cache.get("tandc.not_agreed_terms_" + str(user.pk))
         if not_agreed_terms is None:
             try:
                 LOGGER.debug("Not Agreed Terms")
@@ -175,7 +175,7 @@ class TermsAndConditions(models.Model):
                 )
 
                 cache.set(
-                    "tandc.not_agreed_terms_" + user.get_username(),
+                    "tandc.not_agreed_terms_" + str(user.pk),
                     not_agreed_terms,
                     TERMS_CACHE_SECONDS,
                 )
