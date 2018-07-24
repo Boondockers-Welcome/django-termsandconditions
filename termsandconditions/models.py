@@ -4,10 +4,13 @@
 from collections import OrderedDict
 
 from django.db import models
+from django.db.models import Q
 from django.conf import settings
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.core.cache import cache
+from django.contrib.auth.models import Group
+
 
 import logging
 
@@ -46,6 +49,11 @@ class TermsAndConditions(models.Model):
     text = models.TextField(null=True, blank=True)
     info = models.TextField(
         null=True, blank=True, help_text=_("Provide users with some info about what's changed and why")
+    )
+    groups = models.ManyToManyField(
+        Group,
+        blank=True,
+        help_text=_("Leave empty to apply to all users, or add groups that these conditions apply to."),
     )
     date_active = models.DateTimeField(blank=True, null=True, help_text=_("Leave Null To Never Make Active"))
     date_created = models.DateTimeField(blank=True, auto_now_add=True)
@@ -131,6 +139,12 @@ class TermsAndConditions(models.Model):
                 not_agreed_terms = TermsAndConditions.get_active_terms_list().exclude(
                     userterms__in=UserTermsAndConditions.objects.filter(user=user)
                 ).order_by('slug')
+
+                # filter out any who need the user to be in one of the specified groups
+                not_agreed_terms = not_agreed_terms.filter(
+                    Q(groups__isnull=True) |
+                    Q(groups__isnull=False, groups__in=user.groups.all())
+                ).distinct()
 
                 cache.set('tandc.not_agreed_terms_' + str(user.pk), not_agreed_terms, TERMS_CACHE_SECONDS)
             except (TypeError, UserTermsAndConditions.DoesNotExist):
