@@ -4,11 +4,18 @@
 from collections import OrderedDict
 
 from django.db import models
+from django.db.models import Q
 from django.conf import settings
 from django.core.cache import cache
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+<<<<<<< HEAD
 from django.urls import reverse
+=======
+from django.core.cache import cache
+from django.contrib.auth.models import Group
+
+>>>>>>> Add support for group-based T&C requirements
 
 import logging
 
@@ -71,6 +78,15 @@ class TermsAndConditions(models.Model):
     date_active = models.DateTimeField(
         blank=True, null=True, help_text=_("Leave Null To Never Make Active")
     )
+<<<<<<< HEAD
+=======
+    groups = models.ManyToManyField(
+        Group,
+        blank=True,
+        help_text=_("Leave empty to apply to all users, or add groups that these conditions apply to."),
+    )
+    date_active = models.DateTimeField(blank=True, null=True, help_text=_("Leave Null To Never Make Active"))
+>>>>>>> Add support for group-based T&C requirements
     date_created = models.DateTimeField(blank=True, auto_now_add=True)
 
     class Meta:
@@ -173,6 +189,12 @@ class TermsAndConditions(models.Model):
                     )
                     .order_by("slug")
                 )
+
+                # filter out any who need the user to be in one of the specified groups
+                not_agreed_terms = not_agreed_terms.filter(
+                    Q(groups__isnull=True) |
+                    Q(groups__isnull=False, groups__in=user.groups.all())
+                ).distinct()
 
                 cache.set(
                     "tandc.not_agreed_terms_" + str(user.pk),
