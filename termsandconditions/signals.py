@@ -27,5 +27,9 @@ def terms_updated(sender, **kwargs):
     cache.delete('tandc.active_terms_list')
     if kwargs.get('instance').slug:
         cache.delete('tandc.active_terms_' + kwargs.get('instance').slug)
-    for utandc in UserTermsAndConditions.objects.all():
-        cache.delete('tandc.not_agreed_terms_' + str(utandc.user.pk))
+    ul = UserTermsAndConditions.objects.all().order_by('user__id').values_list(
+        'user__id',
+        flat=True
+    ).distinct()
+    delete_list = ['tandc.not_agreed_terms_' + str(user_id) for user_id in ul]
+    cache.delete_many(delete_list)
