@@ -15,7 +15,10 @@ from django.urls import reverse
 from django.core.cache import cache
 from django.contrib.auth.models import Group
 
+<<<<<<< HEAD
 >>>>>>> Add support for group-based T&C requirements
+=======
+>>>>>>> 6319671c4f7b770ffee4d6d00f29e7ab3c5c6226
 
 import logging
 
@@ -80,6 +83,11 @@ class TermsAndConditions(models.Model):
     )
 <<<<<<< HEAD
 =======
+    groups = models.ManyToManyField(
+        Group,
+        blank=True,
+        help_text=_("Leave empty to apply to all users, or add groups that these conditions apply to."),
+    )
     groups = models.ManyToManyField(
         Group,
         blank=True,
