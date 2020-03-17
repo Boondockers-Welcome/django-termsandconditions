@@ -2,7 +2,7 @@
 
 # pylint: disable=C1001,E0202,W0613
 from collections import OrderedDict
-
+from django.urls import reverse
 from django.db import models
 from django.db.models import Q
 from django.conf import settings
@@ -68,9 +68,10 @@ class TermsAndConditions(models.Model):
     def __str__(self):  # pragma: nocover
         return "{0}-{1:.2f}".format(self.slug, self.version_number)
 
-    @models.permalink
     def get_absolute_url(self):
-        return ('tc_view_specific_version_page', [self.slug, self.version_number])  # pylint: disable=E1101
+        return reverse(
+            'tc_view_specific_version_page',
+            args=[self.slug, self.version_number])  # pylint: disable=E1101
 
     @staticmethod
     def get_active(slug=DEFAULT_TERMS_SLUG):
