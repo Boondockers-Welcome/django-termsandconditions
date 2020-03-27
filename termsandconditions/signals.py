@@ -8,28 +8,30 @@ from django.dispatch import receiver
 from .models import TermsAndConditions, UserTermsAndConditions
 from django.db.models.signals import post_delete, post_save
 
-LOGGER = logging.getLogger(name='termsandconditions')
+LOGGER = logging.getLogger(name="termsandconditions")
 
 
 @receiver([post_delete, post_save], sender=UserTermsAndConditions)
 def user_terms_updated(sender, **kwargs):
     """Called when user terms and conditions is changed - to force cache clearing"""
     LOGGER.debug("User T&C Updated Signal Handler")
-    if kwargs.get('instance').user:
-        cache.delete('tandc.not_agreed_terms_' + str(kwargs.get('instance').user.pk))
+    if kwargs.get("instance").user:
+        cache.delete(
+            "tandc.not_agreed_terms_" + str(kwargs.get('instance').user.pk)
+        )
 
 
 @receiver([post_delete, post_save], sender=TermsAndConditions)
 def terms_updated(sender, **kwargs):
     """Called when terms and conditions is changed - to force cache clearing"""
     LOGGER.debug("T&C Updated Signal Handler")
-    cache.delete('tandc.active_terms_ids')
-    cache.delete('tandc.active_terms_list')
+    cache.delete("tandc.active_terms_ids")
+    cache.delete("tandc.active_terms_list")
     if kwargs.get('instance').slug:
         cache.delete('tandc.active_terms_' + kwargs.get('instance').slug)
     ul = UserTermsAndConditions.objects.all().order_by('user__id').values_list(
-        'user__id',
+        "user__id",
         flat=True
     ).distinct()
-    delete_list = ['tandc.not_agreed_terms_' + str(user_id) for user_id in ul]
+    delete_list = ["tandc.not_agreed_terms_" + str(user_id) for user_id in ul]
     cache.delete_many(delete_list)

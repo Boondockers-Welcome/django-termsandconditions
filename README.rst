@@ -14,20 +14,23 @@ Django Terms and Conditions
     :target: https://coveralls.io/github/cyface/django-termsandconditions?branch=master
     :alt: Coveralls Code Coverage
 
-.. image:: https://scrutinizer-ci.com/g/cyface/django-termsandconditions/badges/quality-score.png?b=master
-    :target: https://scrutinizer-ci.com/g/cyface/django-termsandconditions/
-    :alt: Scrutinizer Code Quality
-
 .. image:: https://readthedocs.org/projects/django-termsandconditions/badge/?version=latest
     :target: http://django-termsandconditions.readthedocs.org/en/latest/?badge=latest
     :alt: Documentation Status
+    
+.. image:: https://pyup.io/repos/github/cyface/django-termsandconditions/shield.svg
+     :target: https://pyup.io/repos/github/cyface/django-termsandconditions/
+     :alt: Updates
 
 Django Terms and Conditions gives you an configurable way to send users to a T&C acceptance page before they
 can access the site.
 
-Contributors:
+*Note that version 2.0+ requires Python 3.5+ and Django 2.2+.*
 
+Maintainer:
 - Tim White (tim@cyface.com)
+
+Contributors:
 - Adibo (https://github.com/adibo)
 - Nathan Swain (https://github.com/swainn)
 
@@ -46,6 +49,8 @@ This module is meant to be as quick to integrate as possible, and thus extensive
 
 Installation
 ============
+
+** Note that version 2.0+ of django-termsandconditions only works with Python 3.5+ and Django 2.2+ **
 
 From `pypi <https://pypi.python.org>`_::
 
@@ -88,12 +93,16 @@ Configuration
 =============
 
 Configuration is minimal for termsandconditions itself, A quick guide to a basic setup
-is below, take a look at the demo app for more details.
+is below, take a look at the demo app's settings.py for more details.
+
+Some useful settings:
+    * `TERMS_IP_HEADER_NAME` Name of header to check for IP address.  Defaults to 'REMOTE_ADDR'. You might need to use 'HTTP_X_FORWARDED_FOR', or other headers in proxy setups.
+    * `TERMS_STORE_IP_ADDRESS` - True/False whether to store IPs with Terms Acceptance
 
 Requirements
 ------------
 
-The app needs ``django>=1.8.3,<2.1``.
+The app needs ``django>=2.2``.
 
 Add INSTALLED_APPS
 ------------------
@@ -124,6 +133,20 @@ Terms and Conditions Versioning
 Note that the versions and dates of T&Cs are important. You can create a new version of a T&C with a future date,
 and once that date is in the past, it will force users to accept that new version of the T&Cs.
 
+Terms and Conditions Default URLs
+---------------------------------
+If you have included the terms urls under **/terms**, these URLs would all be prefixed by that (e.g. /terms/accept/).
+
+* **/** - List all terms that have not been accepted
+* **/accept/** - List all terms that have not been accepted with accept links
+* **/accept/<slug>/** - Show page to accept latest version of a specific terms
+* **/accept/<slug>/<version>/** - Show page to accept a specific version of a specific terms
+* **/active/** - List all active terms
+* **/email/** - Show page to email all unaccepted terms
+* **/email/<slug>/<version>/** - Show page to email specific version of specific terms
+* **/view/<slug>/** - View the latest version of a specific terms
+* **/view/<slug>/<version>/** - View a specific version of a specific terms
+
 Terms and Conditions Middleware
 -------------------------------
 You can force protection of your whole site by using the T&C middleware. Once activated, any attempt to access an
@@ -149,11 +172,19 @@ explicit full paths to exclude. TERMS_EXCLUDE_URL_CONTAINS_LIST is a list of url
 
 You can also define a setting TERMS_EXCLUDE_USERS_WITH_PERM to exclude users with a custom permission you create yourself.::
 
-    TERMS_EXCLUDE_USERS_WITH_PERM 'MyModel.can_skip_terms'
+    TERMS_EXCLUDE_USERS_WITH_PERM = 'MyModel.can_skip_terms'
 
 This can be useful if you need to run continuous login integration tests or simply exclude specific users from having to accept your T&Cs.
 Note that we exclude superusers from this check due to Django's has_perm() method returning True for any permission check, so adding this
 permission to a superuser has no effect.
+
+Terms and Conditions Useful Methods
+-----------------------------------
+
+* **TermsAndConditions.get_active_terms_list()** - Returns a list of all active terms (accepted by current user or not)
+* **TermsAndConditions.get_active_terms_not_agreed_to(<User>)** - Returns a list of terms the specified user has not agreed to
+* **TermsAndConditions.get_active(<slug>)** - Returns the active terms of the specified terms slug
+
 
 Terms and Conditions Cache
 --------------------------
@@ -237,6 +268,19 @@ The following configuration setting applies for the template tag::
     TERMS_HTTP_PATH_FIELD = 'PATH_INFO'
 
 which defaults to ``PATH_INFO``. When needed (e.g. while using a separate AJAX view to take care for the modal) this can be changed to ``HTTP_REFERER``.
+
+Using terms with as_template filter
+-----------------------------------
+If you happen to use termsandconditions which text field includes some template tags (e.g. ``{% url 'you-url' %}``),
+you may want to render its content, before including it into your template. To achieve this goal, use ``include`` with the
+``as_template`` filter, i.e.::
+
+    {% load terms_tags %}
+    .... your template here ....
+
+    {% include terms|as_template %}
+
+Note, that you need to modify the default termsandconditions templates, as the default ones use terms as template variable.
 
 Terms and Conditions Pipeline
 -----------------------------
