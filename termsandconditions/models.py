@@ -76,11 +76,6 @@ class TermsAndConditions(models.Model):
         blank=True,
         help_text=_("Leave empty to apply to all users, or add groups that these conditions apply to."),
     )
-    groups = models.ManyToManyField(
-        Group,
-        blank=True,
-        help_text=_("Leave empty to apply to all users, or add groups that these conditions apply to."),
-    )
     date_active = models.DateTimeField(blank=True, null=True, help_text=_("Leave Null To Never Make Active"))
     date_created = models.DateTimeField(blank=True, auto_now_add=True)
 
