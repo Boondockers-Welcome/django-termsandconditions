@@ -2,23 +2,16 @@
 
 # pylint: disable=C1001,E0202,W0613
 from collections import OrderedDict
-
+from django.urls import reverse
 from django.db import models
 from django.db.models import Q
 from django.conf import settings
 from django.core.cache import cache
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-<<<<<<< HEAD
-from django.urls import reverse
-=======
 from django.core.cache import cache
 from django.contrib.auth.models import Group
 
-<<<<<<< HEAD
->>>>>>> Add support for group-based T&C requirements
-=======
->>>>>>> 6319671c4f7b770ffee4d6d00f29e7ab3c5c6226
 
 import logging
 
@@ -78,23 +71,12 @@ class TermsAndConditions(models.Model):
         blank=True,
         help_text=_("Provide users with some info about what's changed and why"),
     )
-    date_active = models.DateTimeField(
-        blank=True, null=True, help_text=_("Leave Null To Never Make Active")
-    )
-<<<<<<< HEAD
-=======
-    groups = models.ManyToManyField(
-        Group,
-        blank=True,
-        help_text=_("Leave empty to apply to all users, or add groups that these conditions apply to."),
-    )
     groups = models.ManyToManyField(
         Group,
         blank=True,
         help_text=_("Leave empty to apply to all users, or add groups that these conditions apply to."),
     )
     date_active = models.DateTimeField(blank=True, null=True, help_text=_("Leave Null To Never Make Active"))
->>>>>>> Add support for group-based T&C requirements
     date_created = models.DateTimeField(blank=True, auto_now_add=True)
 
     class Meta:
