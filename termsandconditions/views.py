@@ -94,9 +94,15 @@ class AcceptTermsView(CreateView, GetTermsViewMixin):
 
         store_ip_address = getattr(settings, "TERMS_STORE_IP_ADDRESS", True)
         if store_ip_address:
-            ip_address = request.META.get(
-                getattr(settings, "TERMS_IP_HEADER_NAME", DEFAULT_TERMS_IP_HEADER_NAME)
-            )
+            ip_meta_tag = getattr(settings, "TERMS_IP_HEADER_NAME", DEFAULT_TERMS_IP_HEADER_NAME)
+            if isinstance(ip_meta_tag, list):
+                for meta_tag in ip_meta_tag:
+                    ip_address = request.META.get(meta_tag)
+                    if ip_address:
+                        break
+            else:
+                ip_address = request.META.get(ip_meta_tag)
+
             if "," in ip_address:
                 ip_address = ip_address.split(",")[0].strip()
         else:
